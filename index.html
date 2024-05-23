@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Drag and Drop knockout</title>
+
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/reset.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <script type='text/javascript' src='https://knockoutjs.com/downloads/knockout-3.5.1.js'></script>
+    <script type="application/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  </head>
+
+  <body>
+    <div class="content-wrapper">
+      <div class="category-list" data-bind="foreach: categories">
+        <div  
+          class="category-item"
+          data-bind="
+            event: {
+              dragstart: function(data, event) { 
+                if (!event.currentTarget.getAttribute('draggable')) return false
+
+                $(event.target).addClass('draggable')
+
+                $root.dragStart($index(), $parent, 'category')
+
+                return true
+              },
+              dragover: function(data, event) { event.preventDefault() },
+              dragend: function(data, event) {  
+                event.currentTarget.removeAttribute('draggable')
+                $(event.target).removeClass('draggable')
+
+                $root.reset()
+
+                return true
+              },    
+              dragenter: function(data, event) { event.preventDefault() },
+              dragleave: function(data, event) { event.preventDefault() },
+              drop: function(data, event) {
+                $root.dragEnd(data, $index(), $parent, 'category')
+
+                $root.swapItems(
+                  $root.dragStartIndex(),
+                  $root.dragEndIndex(),
+                  $root.dragStartDocumentCategoryIndex(),
+                  $root.dragEndDocumentCategoryIndex(),
+                  $root.draggableElementType(),
+                )
+              }
+            },
+          "
+        >
+          <svg data-bind="click: handlerDropdownVisibility, visible: dropdownVisible, hidden: !dropdownVisible, clickBubble: false" class="dropdown-icon" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="11" cy="11" r="10.5" fill="white" stroke="#D3D8DF"/>
+            <path d="M10.5398 8.19399C10.2813 8.45261 10.2813 8.87192 10.5398 9.13055L13.87 12.4624C14.1285 12.721 14.5476 12.721 14.8061 12.4624C15.0646 12.2037 15.0646 11.7844 14.8061 11.5258L11.4759 8.19399C11.2174 7.93536 10.7983 7.93536 10.5398 8.19399Z" fill="#0066FF"/>
+            <path d="M11.4706 8.19399C11.7291 8.45261 11.7291 8.87192 11.4706 9.13055L8.12999 12.4727C7.87149 12.7313 7.45238 12.7313 7.19388 12.4727C6.93537 12.2141 6.93537 11.7948 7.19388 11.5362L10.5345 8.19399C10.793 7.93536 11.2121 7.93536 11.4706 8.19399Z" fill="#0066FF"/>
+          </svg>
+          <svg data-bind="click: handlerDropdownVisibility, visible: !dropdownVisible, hidden: dropdownVisible, clickBubble: false" class="dropdown-icon" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="11" cy="11" r="10.5" fill="white" stroke="#D3D8DF"/>
+            <path d="M10.5398 13.4727C10.2813 13.2141 10.2813 12.7948 10.5398 12.5361L13.87 9.20431C14.1285 8.94569 14.5476 8.94569 14.8061 9.20432C15.0646 9.46294 15.0646 9.88225 14.8061 10.1409L11.4759 13.4727C11.2174 13.7313 10.7983 13.7313 10.5398 13.4727Z" fill="#0066FF"/>
+            <path d="M11.4706 13.4727C11.7291 13.2141 11.7291 12.7948 11.4706 12.5361L8.12999 9.19397C7.87149 8.93534 7.45238 8.93534 7.19388 9.19397C6.93537 9.45259 6.93537 9.8719 7.19388 10.1305L10.5345 13.4727C10.793 13.7313 11.2121 13.7313 11.4706 13.4727Z" fill="#0066FF"/>
+          </svg>
+          <span class="category-title" data-bind="text: title"></span>
+          <div 
+            class="drag-n-drop-icon-wrapper"
+            data-bind="
+              event: { 
+                mouseenter: function(data, event) {
+                  event.stopPropagation()
+
+                  event.relatedTarget.setAttribute('draggable', true)
+                },
+                mouseleave: function(data, event) {
+                  event.stopPropagation()
+
+                  const parent = event.relatedTarget
+                  if (parent) parent.removeAttribute('draggable')
+                } 
+              },
+            "
+          >
+            <svg class="drag-n-drop-icon" width="8" height="15" viewBox="0 0 8 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4.69594 14.7086C4.30473 15.0991 3.67045 15.0991 3.27924 14.7086L0.293409 11.7296C-0.097803 11.339 -0.0978031 10.7059 0.293409 10.3153C0.684621 9.92482 1.3189 9.92482 1.71011 10.3153L4.69594 13.2944C5.08715 13.6849 5.08715 14.318 4.69594 14.7086Z" fill="#8E9CBB"/>
+              <path d="M3.30385 14.7086C3.69506 15.0991 4.32934 15.0991 4.72055 14.7086L7.70659 11.7296C8.0978 11.339 8.0978 10.7059 7.70659 10.3153C7.31538 9.92482 6.6811 9.92482 6.28989 10.3153L3.30385 13.2944C2.91264 13.6849 2.91264 14.318 3.30385 14.7086Z" fill="#8E9CBB"/>
+              <path d="M3.98759 14.0157C3.43433 14.0157 2.98583 13.5679 2.98583 13.0157V3C2.98583 2.44772 3.43433 2 3.98759 2C4.54085 2 4.98935 2.44772 4.98935 3V13.0157C4.98935 13.5679 4.54085 14.0157 3.98759 14.0157Z" fill="#8E9CBB"/>
+              <path d="M4.69594 0.292893C4.30473 -0.0976311 3.67045 -0.0976311 3.27924 0.292893L0.293409 3.27191C-0.097803 3.66243 -0.0978031 4.2956 0.293409 4.68612C0.684621 5.07664 1.3189 5.07664 1.71011 4.68612L4.69594 1.70711C5.08715 1.31658 5.08715 0.683417 4.69594 0.292893Z" fill="#8E9CBB"/>
+              <path d="M3.30385 0.292893C3.69506 -0.0976311 4.32934 -0.0976311 4.72055 0.292893L7.70659 3.27191C8.0978 3.66243 8.0978 4.2956 7.70659 4.68612C7.31538 5.07664 6.6811 5.07664 6.28989 4.68612L3.30385 1.70711C2.91264 1.31658 2.91264 0.683417 3.30385 0.292893Z" fill="#8E9CBB"/>
+            </svg>
+          </div>
+        </div>
+        <div 
+          class="dropdown-content"
+          data-bind="
+            template: { foreach: documents },
+            css: { dropdownHidden: !dropdownVisible() }
+          "
+        >
+          <div  
+            class="document-item"
+            data-bind="
+              event: {
+                dragstart: function(data, event) { 
+                  if (!event.currentTarget.getAttribute('draggable')) return false
+
+                  $(event.target).addClass('draggable')
+  
+                  $root.dragStart($index(), $parent, 'document')
+  
+                  return true
+                },
+                dragover: function(data, event) { event.preventDefault() },
+                dragend: function(data, event) {  
+                  event.currentTarget.removeAttribute('draggable')
+                  $(event.target).removeClass('draggable')
+  
+                  $root.reset()
+
+                  return true
+                },    
+                dragenter: function(data, event) { event.preventDefault() },
+                dragleave: function(data, event) { event.preventDefault() },
+                drop: function(data, event) {
+                  $root.dragEnd(data, $index(), $parent, 'document')
+
+                  $root.swapItems(
+                    $root.dragStartIndex(),
+                    $root.dragEndIndex(),
+                    $root.dragStartDocumentCategoryIndex(),
+                    $root.dragEndDocumentCategoryIndex(),
+                    $root.draggableElementType(),
+                  )
+                }
+              },
+            "
+          >
+            <span class="document-title" data-bind="text: $data"></span>
+            <div 
+              class="drag-n-drop-icon-wrapper"
+              data-bind="
+                event: { 
+                  mouseenter: function(data, event) {
+                    event.stopPropagation()
+
+                    event.relatedTarget.setAttribute('draggable', true)
+                  },
+                  mouseleave: function(data, event) {
+                    event.stopPropagation()
+
+                    const parent = event.relatedTarget
+                    if (parent) parent.removeAttribute('draggable')
+                  } 
+                },
+              "
+            >
+              <svg class="drag-n-drop-icon" width="8" height="15" viewBox="0 0 8 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4.69594 14.7086C4.30473 15.0991 3.67045 15.0991 3.27924 14.7086L0.293409 11.7296C-0.097803 11.339 -0.0978031 10.7059 0.293409 10.3153C0.684621 9.92482 1.3189 9.92482 1.71011 10.3153L4.69594 13.2944C5.08715 13.6849 5.08715 14.318 4.69594 14.7086Z" fill="#8E9CBB"/>
+                <path d="M3.30385 14.7086C3.69506 15.0991 4.32934 15.0991 4.72055 14.7086L7.70659 11.7296C8.0978 11.339 8.0978 10.7059 7.70659 10.3153C7.31538 9.92482 6.6811 9.92482 6.28989 10.3153L3.30385 13.2944C2.91264 13.6849 2.91264 14.318 3.30385 14.7086Z" fill="#8E9CBB"/>
+                <path d="M3.98759 14.0157C3.43433 14.0157 2.98583 13.5679 2.98583 13.0157V3C2.98583 2.44772 3.43433 2 3.98759 2C4.54085 2 4.98935 2.44772 4.98935 3V13.0157C4.98935 13.5679 4.54085 14.0157 3.98759 14.0157Z" fill="#8E9CBB"/>
+                <path d="M4.69594 0.292893C4.30473 -0.0976311 3.67045 -0.0976311 3.27924 0.292893L0.293409 3.27191C-0.097803 3.66243 -0.0978031 4.2956 0.293409 4.68612C0.684621 5.07664 1.3189 5.07664 1.71011 4.68612L4.69594 1.70711C5.08715 1.31658 5.08715 0.683417 4.69594 0.292893Z" fill="#8E9CBB"/>
+                <path d="M3.30385 0.292893C3.69506 -0.0976311 4.32934 -0.0976311 4.72055 0.292893L7.70659 3.27191C8.0978 3.66243 8.0978 4.2956 7.70659 4.68612C7.31538 5.07664 6.6811 5.07664 6.28989 4.68612L3.30385 1.70711C2.91264 1.31658 2.91264 0.683417 3.30385 0.292893Z" fill="#8E9CBB"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Почему в документации используется var? Не обновляли после ES6? Или есть какая-то необходимость писать через var?
+      const Category = function(id, title, documents = []) {
+        // Предположим что ID пришли с бека
+        // Не будем делать observable первые свойства, нет такой необходимости
+        this.id = id
+        this.title = title
+        this.dropdownVisible = ko.observable(true)
+        // Возможно проще было делать не вложенный массив, а отдельный? 
+        this.documents = ko.observableArray(Array.isArray(documents) ? documents : [])
+
+        this.addDocument = function(document) {
+          this.documents.push(document)
+        }
+
+        this.removeDocument = function(index) {
+          this.documents.splice(index, 1)
+        }
+
+        this.handlerDropdownVisibility = function() {
+          this.dropdownVisible(!this.dropdownVisible())
+        }
+      }
+
+      function AppViewModel() {
+        const self = this;
+
+        self.draggableElementType = ko.observable(null)
+
+        self.dragStartIndex = ko.observable(null)
+        self.dragEndIndex = ko.observable(null)
+
+        // Из-за разрушенных ожиданий пришлось писать с таким костылем)
+        self.dragStartDocumentCategoryIndex = ko.observable(null)
+        self.dragEndDocumentCategoryIndex = ko.observable(null)
+
+        self.reset = function() {
+          self.draggableElementType(null)
+          self.dragStartIndex(null)
+          self.dragEndIndex(null)
+          self.dragStartDocumentCategoryIndex(null)
+          self.dragEndDocumentCategoryIndex(null)
+        }
+
+        self.dragStart = function(index, parent, type) {
+          const parentIsCategory = Object.keys(parent).includes('documents')
+
+          if (type === 'document' && parentIsCategory && parent.id) {
+            const parentIndex = self.categories().findIndex(e => e.id === parent.id)
+            if (typeof parentIndex !== 'undefined') self.dragStartDocumentCategoryIndex(parentIndex)
+          }
+
+          self.draggableElementType(type)
+          self.dragStartIndex(index)
+        }
+
+        self.dragEnd = function(data, index, parent, typeOfDropZone) {
+          if (typeOfDropZone === 'category' && self.draggableElementType() === 'document') {
+            // Перенос документа в категорию (свою или чужую)
+            const parentIndex = self.categories().findIndex(e => e.id === data.id)
+            if (typeof parentIndex !== 'undefined') self.dragEndDocumentCategoryIndex(parentIndex)
+
+            // Нет условий, что при переносе нужно его в определенное место поставить, поэтому просто будем пушить в конец
+            self.dragEndIndex(null)
+          }
+
+          if (typeOfDropZone === 'document' && self.draggableElementType() === 'document') {
+            // Меняем местами документы (возможно в рамках одной категории, а возможно добавляем в другую)
+            const parentIndex = self.categories().findIndex(e => e.id === parent.id)
+            if (typeof parentIndex !== 'undefined') self.dragEndDocumentCategoryIndex(parentIndex)
+
+            // Надо установить index, если изменения происходят в рамках одной категории
+            self.dragEndIndex(index)
+          }
+
+          // Переносим категорию
+          if ((typeOfDropZone === 'category' || typeOfDropZone === 'document') && self.draggableElementType() === 'category') self.dragEndIndex(index)
+        }
+
+        self.swapItems = function(indexFrom, indexTo, dragStartCategoryIndex, dragEndCategoryIndex, type) {
+          if (type !== 'document' && type !== 'category') return
+
+          if (type === 'document' && dragEndCategoryIndex !== null) {
+            if (dragStartCategoryIndex === dragEndCategoryIndex) {
+              // Перетащили на ту же самую категорию, или на свое же место
+              if (indexTo === null || indexFrom === indexTo) return
+
+              // Перетащили на другое место в своем категории (поменяли товары местами)
+              const fromDocument = self.categories()[dragEndCategoryIndex].documents()[indexFrom]
+              const toDocument = self.categories()[dragEndCategoryIndex].documents()[indexTo]
+              
+              // Как по нормальному обновить nested array???
+              // Почему нельзя просто изменить observableArray???
+              self.categories()[dragEndCategoryIndex].documents()[indexTo] = fromDocument
+              self.categories()[dragEndCategoryIndex].documents()[indexFrom] = toDocument
+
+              const modifiedDocuments = [...self.categories()[dragEndCategoryIndex].documents()]
+
+              self.categories()[dragEndCategoryIndex] = new Category(
+                self.categories()[dragEndCategoryIndex].id,
+                self.categories()[dragEndCategoryIndex].title,
+                modifiedDocuments,
+              )
+
+              // Есть что-то вроде nestedValueHasMutated или categories.documents().valueHasMutated()?
+              self.categories.valueHasMutated()
+            } else {
+              // Перенос документа межу категориями
+              const movableDocument = self.categories()[dragStartCategoryIndex].documents()[indexFrom]
+
+              self.categories()[dragStartCategoryIndex].removeDocument(indexFrom)
+              self.categories()[dragEndCategoryIndex].addDocument(movableDocument)
+
+              self.categories.valueHasMutated()
+            }
+            return
+          }
+
+          if (type === 'category') {
+            const fromCategory = self.categories()[indexFrom]
+            const toCategory = self.categories()[indexTo]
+
+            self.categories()[indexTo] = fromCategory
+            self.categories()[indexFrom] = toCategory
+            self.categories.valueHasMutated()
+          }
+        }
+
+        self.categories = ko.observableArray([
+          new Category(1, 'Обязательные для всех', ['ИНН', 'Паспорт']),
+          new Category(2, 'Обязательные для трудоустройства', []),
+          new Category(3, 'Специальные', ['Справка об отсутствие судимости'])
+        ])
+      }
+      
+      ko.applyBindings(new AppViewModel());
+    </script>
+  </body>
+</html>
